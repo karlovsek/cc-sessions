@@ -23,9 +23,30 @@ sessions_dir = PROJECT_ROOT / 'sessions'
 STATE = None
 CONFIG = load_config()
 
+# ===== USER-VISIBLE STARTUP BANNER ===== #
+# Display status to user's terminal (stderr)
+def get_icon(style, nerd_font, emoji, ascii_char):
+    """Get icon based on configured style."""
+    if style == 'nerd_fonts':
+        return nerd_font
+    elif style == 'emoji':
+        return emoji
+    return ascii_char
+
+icon_style = getattr(CONFIG.features, 'icon_style', 'emoji')
+
 # Early exit if sessions are disabled
 if not CONFIG.features.sessions_enabled:
+    output = {
+        "hookSpecificOutput": {
+            "hookEventName": "SessionStart",
+            "additionalContext": ""
+        },
+        "systemMessage": "cc-sessions (disabled)"
+    }
+    print(json.dumps(output))
     sys.exit(0)
+#-#
 
 developer_name = CONFIG.environment.developer_name
 
@@ -270,6 +291,14 @@ if restored:
     context += f"""Restored {restored} stashed todos from previous session:\n\n{STATE.todos.active}\n\nTo clear, use `cd .claude/hooks && python -c \"from shared_state import edit_state; with edit_state() as s: s.todos.clear_stashed()\"`\n\n"""
 #!<
 
+#!> Build status summary for user display
+task_name = STATE.current_task.file if STATE.current_task.file_path else 'No task'
+mode = STATE.mode or 'discussion'
+mode_icon = get_icon(icon_style, '', '💬', '[D]') if mode == 'discussion' else get_icon(icon_style, '', '⚡', '[I]')
+task_icon = get_icon(icon_style, '', '📋', '[T]')
+status_banner = f'cc-sessions | {mode_icon} Mode: {mode} | {task_icon} Task: {task_name}'
+#!<
+
 #!> 2. Nuke transcripts dir
 transcripts_dir = sessions_dir / 'transcripts'
 if transcripts_dir.exists(): shutil.rmtree(transcripts_dir, ignore_errors=True)
@@ -460,7 +489,8 @@ output = {
     "hookSpecificOutput": {
         "hookEventName": "SessionStart",
         "additionalContext": context
-    }
+    },
+    "systemMessage": status_banner
 }
 print(json.dumps(output))
 

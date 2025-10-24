@@ -22,10 +22,29 @@ const sessionsDir = path.join(PROJECT_ROOT, 'sessions');
 let STATE = null;
 const CONFIG = loadConfig();
 
+// ===== USER-VISIBLE STARTUP BANNER ===== //
+// Display status to user's terminal (stderr)
+function getIcon(style, nerdFont, emoji, ascii) {
+    if (style === 'nerd_fonts') return nerdFont;
+    if (style === 'emoji') return emoji;
+    return ascii;
+}
+
+const iconStyle = CONFIG.features?.icon_style || 'emoji';
+
 // Early exit if sessions are disabled
 if (!CONFIG.features.sessions_enabled) {
+    const output = {
+        hookSpecificOutput: {
+            hookEventName: "SessionStart",
+            additionalContext: ""
+        },
+        systemMessage: "cc-sessions (disabled)"
+    };
+    console.log(JSON.stringify(output));
     process.exit(0);
 }
+//-//
 
 const developerName = CONFIG.environment?.developer_name || 'developer';
 
@@ -369,6 +388,16 @@ async function main() {
     });
     //!<
 
+    //!> Build status summary for user display
+    const taskName = STATE.current_task?.file || 'No task';
+    const mode = STATE.mode || 'discussion';
+    const modeIcon = mode === 'discussion'
+        ? getIcon(iconStyle, '', '💬', '[D]')
+        : getIcon(iconStyle, '', '⚡', '[I]');
+    const taskIcon = getIcon(iconStyle, '', '📋', '[T]');
+    const statusBanner = `cc-sessions | ${modeIcon} Mode: ${mode} | ${taskIcon} Task: ${taskName}`;
+    //!<
+
     //!> 2. Nuke transcripts dir
     const transcriptsDir = path.join(sessionsDir, 'transcripts');
     if (fs.existsSync(transcriptsDir)) {
@@ -611,7 +640,8 @@ This notification will appear on every session start until they update or suppre
         hookSpecificOutput: {
             hookEventName: "SessionStart",
             additionalContext: context
-        }
+        },
+        systemMessage: statusBanner
     };
 
     console.log(JSON.stringify(output));
