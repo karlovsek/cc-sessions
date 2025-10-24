@@ -392,13 +392,22 @@ curr_task = STATE.current_task.name if STATE else None
 ##-##
 
 ## ===== CURRENT MODE ===== ##
-curr_mode = "Implement" if STATE.mode == Mode.GO else "Discuss"
-if icon_style == IconStyle.NERD_FONTS:
-    mode_icon = "󰷫 " if STATE.mode == Mode.GO else "󰭹 "
-elif icon_style == IconStyle.EMOJI:
-    mode_icon = "🛠️: " if STATE.mode == Mode.GO else "💬:"
-else:  # ASCII
-    mode_icon = "Mode:"
+if STATE.flags.bypass_mode:
+    curr_mode = "Bypass ACTIVE"
+    if icon_style == IconStyle.NERD_FONTS:
+        mode_icon = " "
+    elif icon_style == IconStyle.EMOJI:
+        mode_icon = "⚠️: "
+    else:  # ASCII
+        mode_icon = "Mode:"
+else:
+    curr_mode = "Implement" if STATE.mode == Mode.GO else "Discuss"
+    if icon_style == IconStyle.NERD_FONTS:
+        mode_icon = "󰷫 " if STATE.mode == Mode.GO else "󰭹 "
+    elif icon_style == IconStyle.EMOJI:
+        mode_icon = "🛠️: " if STATE.mode == Mode.GO else "💬:"
+    else:  # ASCII
+        mode_icon = "Mode:"
 ##-##
 
 ## ===== COUNT EDITED & UNCOMMITTED ===== ##

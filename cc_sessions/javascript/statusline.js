@@ -395,14 +395,25 @@ function main() {
     const currTask = state?.current_task?.name || null;
 
     // Current mode
-    const currMode = state?.mode === Mode.GO ? 'Implementation' : 'Discussion';
-    let modeIcon;
-    if (iconStyle === IconStyle.NERD_FONTS) {
-        modeIcon = state?.mode === Mode.GO ? '󰷫 ' : '󰭹 ';
-    } else if (iconStyle === IconStyle.EMOJI) {
-        modeIcon = state?.mode === Mode.GO ? '🛠️: ' : '💬:';
-    } else {  // ASCII
-        modeIcon = 'Mode:';
+    let currMode, modeIcon;
+    if (state?.flags?.bypass_mode) {
+        currMode = 'Bypass ACTIVE';
+        if (iconStyle === IconStyle.NERD_FONTS) {
+            modeIcon = ' ';
+        } else if (iconStyle === IconStyle.EMOJI) {
+            modeIcon = '⚠️: ';
+        } else {  // ASCII
+            modeIcon = 'Mode:';
+        }
+    } else {
+        currMode = state?.mode === Mode.GO ? 'Implementation' : 'Discussion';
+        if (iconStyle === IconStyle.NERD_FONTS) {
+            modeIcon = state?.mode === Mode.GO ? '󰷫 ' : '󰭹 ';
+        } else if (iconStyle === IconStyle.EMOJI) {
+            modeIcon = state?.mode === Mode.GO ? '🛠️: ' : '💬:';
+        } else {  // ASCII
+            modeIcon = 'Mode:';
+        }
     }
 
     // Count edited & uncommitted files

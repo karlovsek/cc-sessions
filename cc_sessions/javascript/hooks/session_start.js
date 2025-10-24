@@ -390,12 +390,19 @@ async function main() {
 
     //!> Build status summary for user display
     const taskName = STATE.current_task?.file || 'No task';
-    const mode = STATE.mode || 'discussion';
-    const modeIcon = mode === 'discussion'
-        ? getIcon(iconStyle, '', '💬', '[D]')
-        : getIcon(iconStyle, '', '⚡', '[I]');
+    let mode, modeIcon;
+    if (STATE.flags?.bypass_mode) {
+        mode = 'Bypass ACTIVE';
+        modeIcon = getIcon(iconStyle, '', '⚠️', '[B]');
+    } else if (STATE.mode === 'implementation') {
+        mode = 'implementation';
+        modeIcon = getIcon(iconStyle, '', '⚡', '[I]');
+    } else {
+        mode = 'discussion';
+        modeIcon = getIcon(iconStyle, '', '💬', '[D]');
+    }
     const taskIcon = getIcon(iconStyle, '', '📋', '[T]');
-    const statusBanner = `cc-sessions | ${modeIcon} Mode: ${mode} | ${taskIcon} Task: ${taskName}`;
+    const statusBanner = `cc-sessions | ${modeIcon} ${mode} | ${taskIcon} Task: ${taskName}`;
     //!<
 
     //!> 2. Nuke transcripts dir

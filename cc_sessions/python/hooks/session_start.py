@@ -293,10 +293,17 @@ if restored:
 
 #!> Build status summary for user display
 task_name = STATE.current_task.file if STATE.current_task.file_path else 'No task'
-mode = STATE.mode or 'discussion'
-mode_icon = get_icon(icon_style, '', '💬', '[D]') if mode == 'discussion' else get_icon(icon_style, '', '⚡', '[I]')
+if STATE.flags.bypass_mode:
+    mode = 'Bypass ACTIVE'
+    mode_icon = get_icon(icon_style, '', '⚠️', '[B]')
+elif STATE.mode == 'implementation':
+    mode = 'implementation'
+    mode_icon = get_icon(icon_style, '', '⚡', '[I]')
+else:
+    mode = 'discussion'
+    mode_icon = get_icon(icon_style, '', '💬', '[D]')
 task_icon = get_icon(icon_style, '', '📋', '[T]')
-status_banner = f'cc-sessions | {mode_icon} Mode: {mode} | {task_icon} Task: {task_name}'
+status_banner = f'cc-sessions | {mode_icon} {mode} | {task_icon} Task: {task_name}'
 #!<
 
 #!> 2. Nuke transcripts dir
